@@ -11,7 +11,7 @@ Robert Paauw (1218883 - r.paauw@student.tue.nl)
 ![raseone-soundwave-1](raseone-soundwave-1.png)
 
 *Date: 20-11-2018*  
-*Version 0.2*
+*Version 0.4*
 
 
 <div style="page-break-after: always;"></div>
@@ -31,6 +31,30 @@ Time-delay angle-of-arrival estimation on sound could potentially be used in a w
 - Industrial - asset tracking in a factory or wharehouse using a "chirp"
 - Marketing/analytics - Tracking costumers across a store to investigate patterns and improve the store's layout (there might be privacy concerns with this)
 
+# Definitions
+
+In the following paragraphs a few terms will be uses that need further clarification and/or definition.
+
+## Accuracy
+
+The *accuracy* if the measurement describes how large the error is between the estimated value and the real value. For TDAoA it is defined here as error in angle (in degrees) between these values.
+$$
+\begin{align*}
+Error = θ_{measured} - θ_{actual}
+\end{align*}
+$$
+The accuracy consists of two parts. One is the *static error* which is the difference between the average value of N measurements and the actual value. The second part is the *deviation* which is the difference between the highest and lowest value of these N measurements. An example is given below. If the actual value is 44,7 degrees then the *static error* is (45,0 - 44,7 = ) 0,3 degrees. The deviation is then (45,2 - 44,8 =) 0,4 degrees.
+
+![Accuracy static and variable](Accuracy static and variable.png)
+
+## Noise
+
+For this project two types of noise are considered. One is *acoustic noise* and the other is *electronic noise*. Acoustic noise is audible noise produced from one or more audio sources that are not the main audio source which has to be estimated.  For example lets say TDAoA is used to track which person is speaking in a conference call on a hot day. In the background there is an AC unit blowing to cool down the room. The sound of the AC unit eventually reaches both microphones and therefore interfere with the algorithm.
+
+The other type of noise is electronic noise (mostly white noise) which is produced by the microphone and amplifier. This is *random noise* which is different for both microphone channels. Electronic noise is hard to modify in the real world and therefore this will only be considered in the theory and simulations.
+
+<div style="page-break-after: always;"></div>
+
 # Project goals
 
 The main goal of this project is to get some experience with research on and implementation of a digital signal processing algorithms. This goal can be achieved by answering the research questions below.
@@ -38,25 +62,19 @@ The main goal of this project is to get some experience with research on and imp
 ## Primary question
 
 The primary research question that will be answered at the end of the project is:
-*"Is cross-correlation a viable way to estimate from which direction the sound is originating?"*
+"*What are the characteristics of TDAoA estimation based on the cross-correlation algorithm?*"
 
 ## Secondary questions involve:
 
 These secondary questions help answering the primary question. These questions will be answered with theory, simulation and real-world testing where possible.
 
 1. "How accurate can TDAoA be (in degrees) using this technique?"
-   1. Static accuracy
-   1. Variation
 1. "What is the relationship of the distance between the microphones and the accuracy?"
 1. "How sensitive is this technique to noise?"
-   1. Ruis -> enkele bron
-   1. Ruis -> ruis op microfoon (dit alleen simuleren)
-1. "What is the range in both distance and angle of this system?"
-   1. What happens to the accuracy?
-1. "How much processing time does TDAoA using cross-correlation use per run?"
-   1. With different sample rates
-1. "How does the sample resolution and sample rate affect the result?"
-1. "What is the minimum number of samples that have to be stored for cross-correlation?
+1. "What happens to the accuracy if the distance or angle of the sound source is increased?"
+1. "How much processing time (in µS) does TDAoA using cross-correlation use per run for a given number of samples?"
+1. "How does the sample resolution and sample rate affect the accuracy?"
+1. "What is the minimum number of samples that have to be processed for using the cross-correlation algorithm?"
 
 ## Questions that are *outside* the scope of this project:
 
@@ -66,9 +84,20 @@ The following questions are interesting but will not contribute much to this pro
 - "Is it possible to estimate both *polar angle* and *azimuth angle* using this method a third microphone?"
 - "Is it possible to distinguish between two or more audio sources using this method?"
 
+<div style="page-break-after: always;"></div>
+
 # Measurement and verification
 
 *Zie questions voor nummers*
+
+Signals to test with:
+
+- Short beeps
+- Chirp
+- White noise
+- Speech
+
+
 
 1. Meetopstelling voor nauwkeurigheid
    1. Apparaat op gradenboog -> met lat/laser de positie van luidspreker bepalen
@@ -85,6 +114,8 @@ The following questions are interesting but will not contribute much to this pro
 6. Testen met meerdere instellingen voor samplerate en resolutie
 7. Mostly from theory. Test with number of samples below and above the minimum number.
 
+<div style="page-break-after: always;"></div>
+
 # Demo setup
 
 For the demo the system will use two microphones to capture the sound. This will then be digitized and processed by a microcontroller (such as the STM32F407). During phase 2 "literature research and analytical investigation" the embedded platform will be selected. The demo setup is only used to evaluate the properties of the algorithm in a real world scenario and is *not* intended to be optimized for lowest cost or optimal performance.
@@ -94,13 +125,10 @@ For the demo the system will use two microphones to capture the sound. This will
 
 These research questions create a few challenges to overcome. These are:
 
-1. The first challenge would be to find and study literature about TDAoA and cross-correlation in order to answer the theoretical part of the research questions. 
-2. During this time it will also be necessary to create models and simulations to test the theory and evaluate the the algorithm.
-3. After that most hardware requirements can be estimated and the hardware can be chosen.
-4. Then the algorithm has to be implemented on the hardware along with the drivers for reading the ADC, timers and displaying the estimated angle.
-5. To reliably test the implementation against the theory and the models/simulations a test procedure has to be developed.
-
-
+1. Find and study literature about TDAoA and cross-correlation in order to answer the theoretical part of the research questions. 
+2. Develop models and simulations to test the theory and evaluate the the algorithm.
+3. Implement the algorithm on the hardware along with the drivers for reading the ADC, timers and displaying the estimated angle.
+4. Real world testing and analysis using the demo setup
 
 # Deliverables
 
