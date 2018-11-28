@@ -1,0 +1,23 @@
+(basic, formule voor hoek en time delay)
+https://ese.wustl.edu/ContentFiles/Research/UndergraduateResearch/CompletedProjects/WebPages/fl09/rms3/angle%20of%20arrival.htm
+
+(redelijk indept)
+http://www.et.byu.edu/~bmazzeo/ECEn_670_F13/mini_conference_files/Zhang_McMurdie_paper.pdf
+
+(niet heel nuttig)
+
+https://www.vocal.com/beamforming/non-aliased-tdoa-angle-of-arrival-estimation/
+
+https://www.sciencedirect.com/science/article/pii/S209099771300031X
+
+(86 pagina's Master thesis zeer indept)
+
+http://www.diva-portal.org/smash/get/diva2:830430/FULLTEXT01.pdf
+
+(pagina 6 - 10, 13 -17 2D met near en far field)
+
+http://www.ece.iit.edu/~/ecasp/publications/Thesis/Vitaliy%20Kunin%20MS%20Thesis.pdf
+
+(tutorial met matlab)
+
+https://www.youtube.com/watch?v=Sz_4jJKjPIQ
