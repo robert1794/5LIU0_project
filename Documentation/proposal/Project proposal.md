@@ -94,8 +94,7 @@ Signals to test with:
 
 - Short beeps
 - Chirp
-- White noise
-- Speech
+- Pre-recorded audio
 
 
 
@@ -136,5 +135,5 @@ The deliverables are mostly defined by the *study guide* and are listed below fo
 
 - This project proposal document
 - The final report
-- Source code of the model and algorithm
+- Matlab simulation files
 - Source code and hardware *schematics* for the demo setup
