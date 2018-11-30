@@ -10,8 +10,8 @@ Robert Paauw (1218883 - r.paauw@student.tue.nl)
 
 ![raseone-soundwave-1](raseone-soundwave-1.png)
 
-*Date: 20-11-2018*  
-*Version 0.4*
+*Date: 30-11-2018*  
+*Version 1.0*
 
 
 <div style="page-break-after: always;"></div>
@@ -37,27 +37,27 @@ In the following paragraphs a few terms will be uses that need further clarifica
 
 ## Accuracy
 
-The *accuracy* if the measurement describes how large the error is between the estimated value and the real value. For TDAoA it is defined here as error in angle (in degrees) between these values.
+The *accuracy* of the estimation is defined as how large the error is between the estimated value and the real value. For TDAoA it is defined here as error in angle (in degrees) between these values.
 $$
 \begin{align*}
 Error = θ_{measured} - θ_{actual}
 \end{align*}
 $$
-The accuracy consists of two parts. One is the *static error* which is the difference between the average value of N measurements and the actual value. The second part is the *deviation* which is the difference between the highest and lowest value of these N measurements. An example is given below. If the actual value is 44,7 degrees then the *static error* is (45,0 - 44,7 = ) 0,3 degrees. The deviation is then (45,2 - 44,8 =) 0,4 degrees.
+The accuracy consists of two parts. The first part is the *static error* which looks at the average error. The second part is the *deviation* which is the difference between the highest and lowest value of N measurements. An example is given below. If the actual value is 44,7 degrees then the *static error* is (45,0 - 44,7 = ) 0,3 degrees. The deviation is then (45,2 - 44,8 =) 0,4 degrees.
 
 ![Accuracy static and variable](Accuracy static and variable.png)
 
 ## Noise
 
-For this project two types of noise are considered. One is *acoustic noise* and the other is *electronic noise*. Acoustic noise is audible noise produced from one or more audio sources that are not the main audio source which has to be estimated.  For example lets say TDAoA is used to track which person is speaking in a conference call on a hot day. In the background there is an AC unit blowing to cool down the room. The sound of the AC unit eventually reaches both microphones and therefore interfere with the algorithm.
+For this project two types of noise are considered. One is *acoustic noise* and the other is *electronic noise*. Acoustic noise is audible noise produced from one or more audio sources that are not the main audio source.  For example lets say TDAoA is used to track which person is speaking in a conference call on a hot day. In the background there is an AC unit blowing to cool down the room. The sound of the AC unit eventually reaches both microphones and could therefore potentially interfere with the algorithm.
 
-The other type of noise is electronic noise (mostly white noise) which is produced by the microphone and amplifier. This is *random noise* which is different for both microphone channels. Electronic noise is hard to modify in the real world and therefore this will only be considered in the theory and simulations.
+The other type of noise is electronic noise (mostly white noise) which is produced by the microphone and amplifier. This is *random noise* which is different for both microphone channels. Electronic noise is hard to modify in the real world and so will only be considered in the theory and simulations.
 
 <div style="page-break-after: always;"></div>
 
 # Project goals
 
-The main goal of this project is to get some experience with research on and implementation of a digital signal processing algorithms. This goal can be achieved by answering the research questions below.
+The main goal of this project is to get some experience with research on and implementation of a digital signal processing algorithm. To do this an TDAoA algorithm will be implemented. This goal can be achieved by answering the research questions below.
 
 ## Primary question
 
@@ -68,7 +68,7 @@ The primary research question that will be answered at the end of the project is
 
 These secondary questions help answering the primary question. These questions will be answered with theory, simulation and real-world testing where possible.
 
-1. "How accurate can TDAoA be (in degrees) using this technique?"
+1. "How accurate is TDAoA (in degrees) using this technique?"
 1. "What is the relationship of the distance between the microphones and the accuracy?"
 1. "How sensitive is this technique to noise?"
 1. "What happens to the accuracy if the distance or angle of the sound source is increased?"
@@ -78,7 +78,7 @@ These secondary questions help answering the primary question. These questions w
 
 ## Questions that are *outside* the scope of this project:
 
-The following questions are interesting but will not contribute much to this project but are mentioned for completeness. They might be answered in a different project.
+The following questions are interesting but will not contribute much to this project and are mentioned for completeness.
 
 - "Is it possible to estimate the distance to the object with this method and a third microphone?"
 - "Is it possible to estimate both *polar angle* and *azimuth angle* using this method a third microphone?"
@@ -88,30 +88,16 @@ The following questions are interesting but will not contribute much to this pro
 
 # Measurement and verification
 
-*Zie questions voor nummers*
+To measure the accuracy of the system an audio source will be placed at a known location relative to the microphones. In the simulations the position is known and as a result the time delay between the microphones will be calculated using basic trigonometry. The audio source will be represented as a single point. With this model it is also possible to model the signal's amplitude.
+For the *real world* testing a large protractor (printed on A3 paper) will be used in combination with a straight piece of wood or a laser pointer. A loudspeaker will be used as audio source and it will be placed at a specified angles. These measurements will be repeated at different angles, distances of the audio source and distance between microphones to obtain characteristics for those parameters. Three different audio signals that are representative for the use cases defined in the introduction will be used:
 
-Signals to test with:
+- A series of short beeps
+- A chirp
+- A prerecorded speech sample
 
-- Short beeps
-- Chirp
-- Pre-recorded audio
-
-
-
-1. Meetopstelling voor nauwkeurigheid
-   1. Apparaat op gradenboog -> met lat/laser de positie van luidspreker bepalen
-      1. Statisch gedrag -> laten staan en kijken hoeveel de gemiddelde afwijking is
-      2. Variatie -> laten staan en meten tussen welke waarden hij schommelt
-2. Microfoons verplaatsen en meting 1 herhalen
-3. Ruis
-   1. Audiobron in de kamer zetten
-   2. Ruis op microfoons vergelijken met simulatie -> geen externe ruis toevoegen
-4. Range
-   1. Increase distance and see what this does to the accuracy
-   2. Increase angle and see what happens to the accuracy
-5. Measure using internal timer or setting a pin when done and use a scope to measure the frequency/time
-6. Testen met meerdere instellingen voor samplerate en resolutie
-7. Mostly from theory. Test with number of samples below and above the minimum number.
+The influence on noise can be obtained from simulations by adding a white noise signal to the original audio signal. This way the amplitude of the noise can be defined with great accuracy. In the real world testing an audio source with white noise can be added to the room for comparison with the theoretical and simulated effect.
+For measurement of the algorithm's computing time there are two approaches (of which one will be selected later on). One way is to use a hardware timer from the microcontroller that is started on the beginning of the computation and stopped at the end. An other method would be to set a pin *high* when entering the computation function and setting it *low* again when leaving this. Then an external timer or oscilloscope can be used to measure the elapsed time.
+The question about what the effect of sample rate and resolution is on the accuracy of the algorithm will be estimated by changing these parameters in firmware while the audio source stays at a defined position.
 
 <div style="page-break-after: always;"></div>
 
