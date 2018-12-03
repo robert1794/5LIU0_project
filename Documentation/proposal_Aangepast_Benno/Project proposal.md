@@ -10,7 +10,7 @@ Robert Paauw (1218883 - r.paauw@student.tue.nl)
 
 ![raseone-soundwave-1](raseone-soundwave-1.png)
 
-*Date: 30-11-2018*  
+*Date: 03-12-2018*  
 *Version 1.0*
 
 
