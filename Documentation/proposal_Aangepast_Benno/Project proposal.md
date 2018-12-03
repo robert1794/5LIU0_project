@@ -103,7 +103,7 @@ The question about what the effect of sample rate and resolution is on the accur
 
 # Demo setup
 
-The demo system will use two microphones to capture the sound signal. This signal will then be digitized and processed by a microcontroller (such as the STM32F407). During phase 2 "literature research and analytical investigation" the embedded platform will be selected. The demo setup is only used to evaluate the properties of the algorithm in a real world scenario and is *not* intended to be optimized for lowest cost or optimal performance.
+The demo system will use two microphones to capture the sound signal. This signal will then be digitized and processed by a microcontroller (such as the STM32F407). After the theoretical research phase an embedded platform will be selected. The demo setup is only used to evaluate the properties of the algorithm in a real world scenario and is *not* intended to be optimized for lowest cost or optimal performance.
 
 
 # Challenges
