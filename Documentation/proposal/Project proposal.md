@@ -10,34 +10,34 @@ Robert Paauw (1218883 - r.paauw@student.tue.nl)
 
 ![raseone-soundwave-1](raseone-soundwave-1.png)
 
-*Date: 30-11-2018*  
+*Date: 03-12-2018*  
 *Version 1.0*
 
 
 <div style="page-break-after: always;"></div>
 
 # Introduction
-Time-delay angle-of-arrival estimation (TDAoA) is the technique of using two or multiple receivers to identify from which direction a particular signal is coming. For this project we will look at TDAoA for audio. The basic idea is that sound travels with a known speed (about 343m/s) and as a result it is possible to calculate distance from the time it takes to reach a certain location. If two microphones are placed at a known distance from each other then the angle can be calculated using the time difference between the audio arriving at microphone 1 and 2. This is shown in the figure below. It is suggested that this time difference can be extracted using cross-correlation on the signals from the microphones. Since signal processing is one of the main subjects of this course it will be the focus of this project. The project organization from the study guide will be used as guideline for this project.
+Time-delay angle-of-arrival estimation (TDAoA) is the technique of using two or more receivers to identify from which direction a particular signal is coming. For this project we will look at TDAoA for audio. The basic idea is that sound travels with a known speed (about 343m/s) and as a result it is possible to calculate distance from the time it takes to reach a certain location. If two microphones are placed at a known distance from each other then the angle can be calculated using the time difference between the audio arriving at microphone 1 and 2. This is shown in the figure below. It is suggested that this time difference can be extracted using cross-correlation on the signals from the microphones. Since signal processing is one of the main subjects of this course it will be the focus of this project. The project organization from the study guide will be used as guideline for this project.
 
 ![Setup schematic](Setup schematic.png)
 
 ## Example applications
 
-Time-delay angle-of-arrival estimation on sound could potentially be used in a wide variety of domains. A few examples of applications where this technique might be interesting for:
+Time-delay angle-of-arrival estimation on sound could potentially be used in a wide variety of domains. Examples of applications where this technique might be interesting for are:
 
 - Conference calls - identify who speaks at a certain moment
-- In home handfree video calls - aim the camera on the speaker and use beam-forming to improve sound quality
+- In home hands-free video calls - aim the camera on the speaker and use beam-forming to improve sound quality
 - Military - identify where the enemy is located based on sound
-- Industrial - asset tracking in a factory or wharehouse using a "chirp"
+- Industrial - asset tracking in a factory or warehouse using a "chirp"
 - Marketing/analytics - Tracking costumers across a store to investigate patterns and improve the store's layout (there might be privacy concerns with this)
 
 # Definitions
 
-In the following paragraphs a few terms will be uses that need further clarification and/or definition.
+In the following paragraphs a few terms will be used that need further clarification and/or a definition.
 
 ## Accuracy
 
-The *accuracy* of the estimation is defined as how large the error is between the estimated value and the real value. For TDAoA it is defined here as error in angle (in degrees) between these values.
+The *accuracy* of the estimation is defined as how large the error is between the estimated value and the real value. For TDAoA it is defined as error of the angle (in degrees) between these values.
 $$
 \begin{align*}
 Error = θ_{measured} - θ_{actual}
@@ -49,15 +49,15 @@ The accuracy consists of two parts. The first part is the *static error* which l
 
 ## Noise
 
-For this project two types of noise are considered. One is *acoustic noise* and the other is *electronic noise*. Acoustic noise is audible noise produced from one or more audio sources that are not the main audio source.  For example lets say TDAoA is used to track which person is speaking in a conference call on a hot day. In the background there is an AC unit blowing to cool down the room. The sound of the AC unit eventually reaches both microphones and could therefore potentially interfere with the algorithm.
+During this project two types of noise are considered, *acoustic noise* and *electronic noise*. Acoustic noise is audible noise produced from one or more audio sources that are not the main audio source.  For example lets say TDAoA is used to track which person is speaking in a conference call on a hot day. In the background there is an AC unit blowing to cool down the room. The sound of the AC unit eventually reaches both microphones and could therefore potentially interfere with the algorithm.
 
-The other type of noise is electronic noise (mostly white noise) which is produced by the microphone and amplifier. This is *random noise* which is different for both microphone channels. Electronic noise is hard to modify in the real world and so will only be considered in the theory and simulations.
+The other type of noise is electronic noise (mostly white noise) which is produced by the microphone and amplifier. This is *random noise* is different for both microphone channels. Electronic noise is hard to modify in the real world and thus will only be considered in the theory and simulations.
 
 <div style="page-break-after: always;"></div>
 
 # Project goals
 
-The main goal of this project is to get some experience with research on and implementation of a digital signal processing algorithm. To do this an TDAoA algorithm will be implemented. This goal can be achieved by answering the research questions below.
+The main goal of this project is to get gain experience with research on and implementation of a digital signal processing algorithm. To do this an TDAoA algorithm will be implemented. This goal can be achieved by answering the research questions below.
 
 ## Primary question
 
@@ -96,23 +96,23 @@ For the *real world* testing a large protractor (printed on A3 paper) will be us
 - A prerecorded speech sample
 
 The influence on noise can be obtained from simulations by adding a white noise signal to the original audio signal. This way the amplitude of the noise can be defined with great accuracy. In the real world testing an audio source with white noise can be added to the room for comparison with the theoretical and simulated effect.
-For measurement of the algorithm's computing time there are two approaches (of which one will be selected later on). One way is to use a hardware timer from the microcontroller that is started on the beginning of the computation and stopped at the end. An other method would be to set a pin *high* when entering the computation function and setting it *low* again when leaving this. Then an external timer or oscilloscope can be used to measure the elapsed time.
+For measurement of the algorithm's computing time there are two approaches (of which one will be selected later on). One way is to use a hardware timer from the microcontroller that is started at the beginning of the computation and stopped at the end. An other method would be to set a pin *high* when entering the computation function and setting it *low* again when leaving this. Then an external timer or oscilloscope can be used to measure the elapsed time.
 The question about what the effect of sample rate and resolution is on the accuracy of the algorithm will be estimated by changing these parameters in firmware while the audio source stays at a defined position.
 
 <div style="page-break-after: always;"></div>
 
 # Demo setup
 
-For the demo the system will use two microphones to capture the sound. This will then be digitized and processed by a microcontroller (such as the STM32F407). During phase 2 "literature research and analytical investigation" the embedded platform will be selected. The demo setup is only used to evaluate the properties of the algorithm in a real world scenario and is *not* intended to be optimized for lowest cost or optimal performance.
+The demo system will use two microphones to capture the sound signal. This signal will then be digitized and processed by a microcontroller (such as the STM32F407). After the theoretical research phase an embedded platform will be selected. The demo setup is only used to evaluate the properties of the algorithm in a real world scenario and is *not* intended to be optimized for lowest cost or optimal performance.
 
 
 # Challenges
 
 These research questions create a few challenges to overcome. These are:
 
-1. Find and study literature about TDAoA and cross-correlation in order to answer the theoretical part of the research questions. 
-2. Develop models and simulations to test the theory and evaluate the the algorithm.
-3. Implement the algorithm on the hardware along with the drivers for reading the ADC, timers and displaying the estimated angle.
+1. Find and study literature about TDAoA and cross-correlation in order to answer the theoretical part of the research questions.
+2. Develop models and simulations to test the theory and evaluate the algorithm.
+3. Implementing the algorithm on the hardware along with the drivers for reading the ADC, timers and displaying the estimated angle.
 4. Real world testing and analysis using the demo setup
 
 # Deliverables
