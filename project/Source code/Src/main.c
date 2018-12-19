@@ -54,6 +54,7 @@
 #include "i2c.h"
 #include "i2s.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -147,7 +148,7 @@ void print_menu_options()
 	printf("(1) Capture microphones\r\n");
 	printf("(2) Calculate time delay\r\n");
 	printf("(3) Calibration mode\r\n");
-	printf("(4) ADC buffers\r\n");
+	printf("(4) Print ADC buffers\r\n");
 	printf("(R) Toggle continuous running mode\r\n");
 	printf("(T) Select trigger mode\r\n");
 	printf("(-) Decrease trigger level\r\n");
@@ -182,6 +183,20 @@ void print_startup_text()
 }
 
 
+/// \brief prints the values of the ADC in decimal csv format with ';' as seperator
+/// \param[in] buf_a pointer to first buffer
+/// \param[in] buf_b pointer to second buffer
+/// \param[in] nr_of_samples number of samples to print
+void print_adc_buffers(int16_t *buf_a, int16_t *buf_b, uint32_t nr_of_samples)
+{
+	printf("\r\nIndex;Buffer A;BufferB\r\n");
+
+	for (int i = 0; i < nr_of_samples; i++)
+	{
+		printf("%d;%d;%d\r\n", i, (int)buf_a[i], (int)buf_b[i]);
+	}
+}
+
 /// \brief Process one character from the terminal
 /// \param[in] rx_char The character received from the terminal
 /// \author R. Paauw
@@ -196,6 +211,22 @@ void process_uart_command(uint8_t rx_char)
 		printf("Capturing microphones...\r\n");
 		printf("FAIL: Not implemented\r\n");
 		// ToDo Capture microphones here
+
+		for (int i = 0; i < adc_buffer_size; i++)
+		{
+			adc_buffer_a[i] = 0;
+			adc_buffer_a[i] = 0;
+		}
+
+		HAL_ADC_Start(&hadc1);
+		HAL_TIM_Base_Start(&htim1);
+
+		uint32_t starttime = HAL_GetTick();
+
+		while((HAL_GetTick() - starttime) < 1000) ;
+
+		HAL_TIM_Base_Stop(&htim1);
+		HAL_ADC_Stop(&hadc1);
 
 		printf("\r\n> ");
 		break;
@@ -218,8 +249,13 @@ void process_uart_command(uint8_t rx_char)
 	case '4':
 		printf("%c\r\n", rx_char);
 		printf("Displaying ADC buffers...\r\n");
-		printf("FAIL: Not implemented\r\n");
-		// ToDo Implement printing ADC buffers here
+
+		if (get_adc_index() == adc_buffer_size)
+		{
+			print_adc_buffers(adc_buffer_a, adc_buffer_b, adc_buffer_size);
+		} else {
+			printf("FAIL: ADC buffers not ready\r\n");
+		}
 
 		printf("\r\n> ");
 		break;
@@ -313,6 +349,7 @@ int main(void)
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_USART3_UART_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
   setvbuf(stdout, NULL, _IONBF, 0); // Set stdout (and thus printf) to be unbuffered.
