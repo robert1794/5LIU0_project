@@ -65,34 +65,22 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "dsp_algorithms.h"
+#include "adc_capture.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef enum trigger_type_t {
-	trigger_off = 0,
-	trigger_rising,
-	trigger_falling,
-	trigger_any,
-	nr_of_trigger_values
-} trigger_type_t;
 
-const char trigger_type_names[][20] = {
-		"trigger_off",
-		"trigger_rising",
-		"trigger_falling",
-		"trigger_any"
-};
 
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define trigger_stepsize	50
-#define trigger_min		50
-#define trigger_max		3300
+
 
 /* USER CODE END PD */
 
@@ -104,8 +92,12 @@ const char trigger_type_names[][20] = {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-trigger_type_t trigger_mode = trigger_off;
-uint16_t trigger_level_mv = 100;
+const char trigger_type_names[][20] = {
+		"trigger_off",
+		"trigger_rising",
+		"trigger_falling",
+		"trigger_any"
+};
 
 
 /* USER CODE END PV */
@@ -156,7 +148,8 @@ void print_menu_options()
 	printf("(2) Calculate time delay\r\n");
 	printf("(3) Calibration mode\r\n");
 	printf("(4) ADC buffers\r\n");
-	printf("(5) Enable/disable trigger\r\n");
+	printf("(R) Toggle continuous running mode\r\n");
+	printf("(T) Select trigger mode\r\n");
 	printf("(-) Decrease trigger level\r\n");
 	printf("(+) Increase trigger level\r\n");
 	printf("(C) Clear screen\r\n");
@@ -194,6 +187,8 @@ void print_startup_text()
 /// \author R. Paauw
 void process_uart_command(uint8_t rx_char)
 {
+	int16_t trigger_level_mv;
+
 	switch(rx_char)
 	{
 	case '1':
@@ -228,25 +223,38 @@ void process_uart_command(uint8_t rx_char)
 
 		printf("\r\n> ");
 		break;
-	case '5':
+	case 'R':
+	case 'r':
 		printf("%c\r\n", rx_char);
-		trigger_mode++;
+		printf("Entering continuous running mode...\r\n");
+		printf("FAIL: Not implemented\r\n");
+		// ToDo Implement continuous running mode here
+
+		printf("\r\n> ");
+		break;
+	case 'T':
+	case 't':
+		printf("%c\r\n", rx_char);
+		trigger_type_t trigger_mode = get_trigger_mode() + 1;
 		if (trigger_mode >= nr_of_trigger_values)
 			trigger_mode = trigger_off;
+		set_trigger_mode(trigger_mode);
 		printf("Trigger type set to: [%s]\r\n", trigger_type_names[(int)trigger_mode]);
 		printf("\r\n> ");
 		break;
 	case '-':
 		printf("%c\r\n", rx_char);
+		trigger_level_mv = get_trigger_level();
 		if ((trigger_level_mv - trigger_stepsize) >= trigger_min)
-			trigger_level_mv -= trigger_stepsize;
+			set_trigger_level(trigger_level_mv - trigger_stepsize);
 		printf("Decreased trigger level to %dmV\r\n", trigger_level_mv);
 		printf("\r\n> ");
 		break;
 	case '+':
 		printf("%c\r\n", rx_char);
+		trigger_level_mv = get_trigger_level();
 		if ((trigger_level_mv + trigger_stepsize) <= (trigger_max))
-			trigger_level_mv += trigger_stepsize;
+			set_trigger_level(trigger_level_mv + trigger_stepsize);
 		printf("Increased trigger level to %dmV\r\n", trigger_level_mv);
 		printf("\r\n> ");
 		break;
