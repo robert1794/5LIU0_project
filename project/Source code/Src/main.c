@@ -55,21 +55,44 @@
 #include "i2s.h"
 #include "spi.h"
 #include "usart.h"
-#include "usb_host.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "string.h"
+#include  <errno.h>
+#include  <sys/unistd.h> // STDOUT_FILENO, STDERR_FILENO
+#include <stdint.h>
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+typedef enum trigger_type_t {
+	trigger_off = 0,
+	trigger_rising,
+	trigger_falling,
+	trigger_any,
+	nr_of_trigger_values
+} trigger_type_t;
+
+const char trigger_type_names[][20] = {
+		"trigger_off",
+		"trigger_rising",
+		"trigger_falling",
+		"trigger_any"
+};
+
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define trigger_stepsize	50
+#define trigger_min		50
+#define trigger_max		3300
 
 /* USER CODE END PD */
 
@@ -81,19 +104,170 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+trigger_type_t trigger_mode = trigger_off;
+uint16_t trigger_level_mv = 100;
+
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_USB_HOST_Process(void);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/// \brief write for printf
+/// Source: https://electronics.stackexchange.com/questions/206113/how-do-i-use-the-printf-function-on-stm32
+/// Uses UART3 to transmit data
+int _write(int file, char *data, int len)
+{
+	if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
+	{
+			errno = EBADF;
+			return -1;
+	}
+
+	// arbitrary timeout 1000
+	HAL_StatusTypeDef status = HAL_UART_Transmit(&huart3, (uint8_t*)data, len, 1000);
+
+	// return # of bytes written - as best we can tell
+	return (status == HAL_OK ? len : 0);
+}
+
+
+/// \brief clears the terminal by writing a lot of empty lines to it
+/// \author R. Paauw
+void clear_terminal()
+{
+	for (int i = 0; i < 80; i++)
+	{
+		printf("\r\n");
+	}
+}
+
+/// \brief prints the menu options that are available on the system
+/// \author R. Paauw
+void print_menu_options()
+{
+	printf("(1) Capture microphones\r\n");
+	printf("(2) Calculate time delay\r\n");
+	printf("(3) Calibration mode\r\n");
+	printf("(4) ADC buffers\r\n");
+	printf("(5) Enable/disable trigger\r\n");
+	printf("(-) Decrease trigger level\r\n");
+	printf("(+) Increase trigger level\r\n");
+	printf("(C) Clear screen\r\n");
+	printf("(H) Print menu options\r\n");
+}
+
+
+
+/// \brief Prints text at startup
+/// \author R. Paauw
+void print_startup_text()
+{
+	char startup_string[] = "| 5LIU0 project - TDOA angle estimation |";
+	char lines[sizeof(startup_string)];
+	for (int i = 1; i < (sizeof(lines) - 1); i++)
+	{
+		lines[i] = '=';
+	}
+	lines[0] = '+';
+	lines[sizeof(lines) - 1] = '+';
+
+	clear_terminal();
+	printf("%s\r\n", lines);
+	printf("%s\r\n", startup_string);
+	printf("%s\r\n\r\n", lines);
+
+	print_menu_options();
+
+	printf("\r\n> ");
+}
+
+
+/// \brief Process one character from the terminal
+/// \param[in] rx_char The character received from the terminal
+/// \author R. Paauw
+void process_uart_command(uint8_t rx_char)
+{
+	switch(rx_char)
+	{
+	case '1':
+		printf("%c\r\n", rx_char);
+		printf("Capturing microphones...\r\n");
+		printf("FAIL: Not implemented\r\n");
+		// ToDo Capture microphones here
+
+		printf("\r\n> ");
+		break;
+	case '2':
+		printf("%c\r\n", rx_char);
+		printf("Calculating time delay...\r\n");
+		printf("FAIL: Not implemented\r\n");
+		// ToDo Calculate time delay here
+
+		printf("\r\n> ");
+		break;
+	case '3':
+		printf("%c\r\n", rx_char);
+		printf("Entering calibration mode...\r\n");
+		printf("FAIL: Not implemented\r\n");
+		// ToDo Implement calibration mode
+
+		printf("\r\n> ");
+		break;
+	case '4':
+		printf("%c\r\n", rx_char);
+		printf("Displaying ADC buffers...\r\n");
+		printf("FAIL: Not implemented\r\n");
+		// ToDo Implement printing ADC buffers here
+
+		printf("\r\n> ");
+		break;
+	case '5':
+		printf("%c\r\n", rx_char);
+		trigger_mode++;
+		if (trigger_mode >= nr_of_trigger_values)
+			trigger_mode = trigger_off;
+		printf("Trigger type set to: [%s]\r\n", trigger_type_names[(int)trigger_mode]);
+		printf("\r\n> ");
+		break;
+	case '-':
+		printf("%c\r\n", rx_char);
+		if ((trigger_level_mv - trigger_stepsize) >= trigger_min)
+			trigger_level_mv -= trigger_stepsize;
+		printf("Decreased trigger level to %dmV\r\n", trigger_level_mv);
+		printf("\r\n> ");
+		break;
+	case '+':
+		printf("%c\r\n", rx_char);
+		if ((trigger_level_mv + trigger_stepsize) <= (trigger_max))
+			trigger_level_mv += trigger_stepsize;
+		printf("Increased trigger level to %dmV\r\n", trigger_level_mv);
+		printf("\r\n> ");
+		break;
+	case 'C':
+	case 'c':
+		clear_terminal();
+		printf("> ");
+		break;
+	case 'H':
+	case 'h':
+		printf("%c\r\n\r\n", rx_char);
+		print_menu_options();
+		printf("\r\n> ");
+		break;
+	default:
+		if ((rx_char >= ' ') && (rx_char <= '~'))
+			printf("Unknown command <%c> use (H) to show supported commands\r\n\r\n> ", rx_char);
+		break;
+	 }
+}
+
 
 /* USER CODE END 0 */
 
@@ -128,11 +302,14 @@ int main(void)
   MX_I2C1_Init();
   MX_I2S3_Init();
   MX_SPI1_Init();
-  MX_USB_HOST_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  setvbuf(stdout, NULL, _IONBF, 0); // Set stdout (and thus printf) to be unbuffered.
+
+  print_startup_text();
 
   /* USER CODE END 2 */
 
@@ -140,8 +317,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	uint8_t rx_char;
+
+	HAL_StatusTypeDef status = HAL_UART_Receive(&huart3, &rx_char, 1, 1);
+
+	if (status == HAL_OK)
+	{
+		process_uart_command(rx_char);
+	}
+
     /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
   }
