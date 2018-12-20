@@ -69,6 +69,9 @@
 #include "dsp_algorithms.h"
 #include "adc_capture.h"
 
+//DEBUG
+#include "stm32f4xx_hal_tim.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -165,7 +168,7 @@ void print_startup_text()
 {
 	char startup_string[] = "| 5LIU0 project - TDOA angle estimation |";
 	char lines[sizeof(startup_string)];
-	for (int i = 1; i < (sizeof(lines) - 1); i++)
+	for (int i = 1; i < (sizeof(lines) - 2); i++)
 	{
 		lines[i] = '=';
 	}
@@ -218,15 +221,26 @@ void process_uart_command(uint8_t rx_char)
 			adc_buffer_a[i] = 0;
 		}
 
-		HAL_ADC_Start(&hadc1);
-		HAL_TIM_Base_Start(&htim1);
+		//TIM_CCxChannelCmd(TIM1, TIM_CHANNEL_1, TIM_CCx_ENABLE);
+
+		__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_UPDATE);
+
+		HAL_ADC_Start_IT(&hadc1);
+		HAL_TIM_Base_Start_IT(&htim1);
 
 		uint32_t starttime = HAL_GetTick();
 
-		while((HAL_GetTick() - starttime) < 1000) ;
+		while((HAL_GetTick() - starttime) < 1000)
+		{
+			if ((HAL_GetTick() - starttime) % 100 == 0)
+			{
+				printf("[%lu] t= %lu\r\n", (HAL_GetTick() - starttime), __HAL_TIM_GET_COUNTER(&htim1));
+			}
 
-		HAL_TIM_Base_Stop(&htim1);
-		HAL_ADC_Stop(&hadc1);
+		}
+
+		HAL_TIM_Base_Stop_IT(&htim1);
+		HAL_ADC_Stop_IT(&hadc1);
 
 		printf("\r\n> ");
 		break;
