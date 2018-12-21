@@ -50,7 +50,14 @@ uint32_t get_adc_index()
 	return adc_buffer_index;
 }
 
-///
+/// \brief resets the ADC buffer index to 0.
+void reset_adc_index()
+{
+	adc_buffer_index = 0;
+}
+
+/// \brief ADC capture complete callback
+/// Used to store the signal from the microphones in a buffer
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if (hadc == &hadc1)
@@ -60,9 +67,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			adc_buffer_a[adc_buffer_index] = HAL_ADC_GetValue(&hadc1);
 			adc_buffer_index++;
 		}
-	} //else if (hadc == &hadc2) {
-	//
-	//}
+	} else if (hadc == &hadc2) {
+		if (adc_buffer_index < adc_buffer_size)
+		{
+			adc_buffer_b[adc_buffer_index] = HAL_ADC_GetValue(&hadc2);
+			//adc_buffer_index++;
+		}
+	} else {// Else: somthing went seriously wrong here...
+		printf("ERROR: ADC interrupt - unknown source\r\n");
+	}
 }
 
 

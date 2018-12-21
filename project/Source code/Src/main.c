@@ -212,35 +212,30 @@ void process_uart_command(uint8_t rx_char)
 	case '1':
 		printf("%c\r\n", rx_char);
 		printf("Capturing microphones...\r\n");
-		printf("FAIL: Not implemented\r\n");
-		// ToDo Capture microphones here
 
 		for (int i = 0; i < adc_buffer_size; i++)
 		{
-			adc_buffer_a[i] = 0;
-			adc_buffer_a[i] = 0;
+			adc_buffer_a[i] = 6;
+			adc_buffer_b[i] = 7;
 		}
 
-		//TIM_CCxChannelCmd(TIM1, TIM_CHANNEL_1, TIM_CCx_ENABLE);
-
-		__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_UPDATE);
-
 		HAL_ADC_Start_IT(&hadc1);
-		HAL_TIM_Base_Start_IT(&htim1);
+		HAL_ADC_Start_IT(&hadc2);
+		HAL_TIM_Base_Start_IT(&htim3);
+
+		hadc1.Instance->CR2 |= (uint32_t)ADC_CR2_SWSTART;
 
 		uint32_t starttime = HAL_GetTick();
 
-		while((HAL_GetTick() - starttime) < 1000)
-		{
-			if ((HAL_GetTick() - starttime) % 100 == 0)
-			{
-				printf("[%lu] t= %lu\r\n", (HAL_GetTick() - starttime), __HAL_TIM_GET_COUNTER(&htim1));
-			}
+		reset_adc_index();
+		while(get_adc_index() != adc_buffer_size);
+		uint32_t time_elapsed = HAL_GetTick() - starttime;
 
-		}
-
-		HAL_TIM_Base_Stop_IT(&htim1);
+		HAL_TIM_Base_Stop_IT(&htim3);
 		HAL_ADC_Stop_IT(&hadc1);
+		HAL_ADC_Stop_IT(&hadc2);
+
+		printf("Capture complete in %dms\r\n", time_elapsed);
 
 		printf("\r\n> ");
 		break;
@@ -268,7 +263,7 @@ void process_uart_command(uint8_t rx_char)
 		{
 			print_adc_buffers(adc_buffer_a, adc_buffer_b, adc_buffer_size);
 		} else {
-			printf("FAIL: ADC buffers not ready\r\n");
+			printf("FAIL: ADC buffers not ready, index = %d\r\n", get_adc_index());
 		}
 
 		printf("\r\n> ");
@@ -363,7 +358,7 @@ int main(void)
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_USART3_UART_Init();
-  MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   setvbuf(stdout, NULL, _IONBF, 0); // Set stdout (and thus printf) to be unbuffered.

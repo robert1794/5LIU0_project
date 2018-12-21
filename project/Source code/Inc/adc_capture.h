@@ -13,7 +13,7 @@
 #include "stdbool.h"
 
 // Defines
-#define adc_buffer_size 	10000
+#define adc_buffer_size 	1000
 #define trigger_stepsize	50
 #define trigger_min		50
 #define trigger_max		3300
@@ -43,6 +43,8 @@ trigger_type_t 	get_trigger_mode();
 void 		set_trigger_level(int16_t new_trigger_level_mv);
 int16_t		get_trigger_level();
 uint32_t 	get_adc_index();
+void 		reset_adc_index();
+
 
 
 
