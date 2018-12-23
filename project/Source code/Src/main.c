@@ -219,9 +219,12 @@ void process_uart_command(uint8_t rx_char)
 			adc_buffer_b[i] = 7;
 		}
 
-
-//
-//		hadc1.Instance->CR2 |= (uint32_t)ADC_CR2_SWSTART;
+		if (get_trigger_mode() != trigger_off)
+		{
+			set_adc_mode(ADC_TRIGGER_MODE);
+		} else {
+			set_adc_mode(ADC_CAPTURE_MODE);
+		}
 
 		uint32_t starttime = HAL_GetTick();
 
@@ -239,7 +242,7 @@ void process_uart_command(uint8_t rx_char)
 		HAL_ADC_Stop_IT(&hadc1);
 		HAL_ADC_Stop_IT(&hadc2);
 
-		printf("Capture complete in %dms\r\n", time_elapsed);
+		printf("Capture complete in %lums\r\n", time_elapsed);
 
 		printf("\r\n> ");
 		break;
@@ -267,7 +270,7 @@ void process_uart_command(uint8_t rx_char)
 		{
 			print_adc_buffers(adc_buffer_a, adc_buffer_b, adc_buffer_size);
 		} else {
-			printf("FAIL: ADC buffers not ready, index = %d\r\n", get_adc_index());
+			printf("FAIL: ADC buffers not ready, index = %lu\r\n", get_adc_index());
 		}
 
 		printf("\r\n> ");

@@ -29,6 +29,11 @@ typedef enum trigger_type_t {
 } trigger_type_t;
 
 
+typedef enum adc_mode_t {
+	ADC_TRIGGER_MODE,
+	ADC_CAPTURE_MODE
+} adc_mode_t;
+
 
 // Global variables
 extern int16_t 	adc_buffer_a[adc_buffer_size];
@@ -45,7 +50,7 @@ int16_t		get_trigger_level();
 uint32_t 	get_adc_index();
 void 		reset_adc_index();
 
-
+void 		set_adc_mode(adc_mode_t new_mode);
 
 
 #endif /* ADC_CAPTURE_H_ */
