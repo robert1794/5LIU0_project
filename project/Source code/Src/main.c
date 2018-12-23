@@ -219,15 +219,19 @@ void process_uart_command(uint8_t rx_char)
 			adc_buffer_b[i] = 7;
 		}
 
-		HAL_ADC_Start_IT(&hadc1);
-		HAL_ADC_Start_IT(&hadc2);
-		HAL_TIM_Base_Start_IT(&htim3);
 
-		hadc1.Instance->CR2 |= (uint32_t)ADC_CR2_SWSTART;
+//
+//		hadc1.Instance->CR2 |= (uint32_t)ADC_CR2_SWSTART;
 
 		uint32_t starttime = HAL_GetTick();
 
 		reset_adc_index();
+
+
+		HAL_ADC_Start_IT(&hadc1);
+		HAL_ADC_Start_IT(&hadc2);
+		HAL_TIM_Base_Start_IT(&htim3);
+
 		while(get_adc_index() != adc_buffer_size);
 		uint32_t time_elapsed = HAL_GetTick() - starttime;
 
