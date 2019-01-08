@@ -13,7 +13,7 @@
 #include "stdbool.h"
 
 // Defines
-#define adc_buffer_size 	1000
+#define adc_buffer_size 	10000
 #define trigger_stepsize	50
 #define trigger_min		50
 #define trigger_max		3300
