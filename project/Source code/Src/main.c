@@ -150,7 +150,7 @@ void print_menu_options()
 {
 	printf("(1) Capture microphones\r\n");
 	printf("(2) Calculate time delay\r\n");
-	printf("(3) Calibration mode\r\n");
+	printf("(3) Signal statistics\r\n");
 	printf("(4) Print ADC buffers\r\n");
 	printf("(R) Toggle continuous running mode\r\n");
 	printf("(T) Select trigger mode\r\n");
@@ -206,12 +206,15 @@ void print_adc_buffers(int16_t *buf_a, int16_t *buf_b, uint32_t nr_of_samples)
 void process_uart_command(uint8_t rx_char)
 {
 	int16_t trigger_level_mv;
+	uint8_t rx_char_2 = 'a';
 
 	switch(rx_char)
 	{
 	case '1':
 		printf("%c\r\n", rx_char);
 		printf("Capturing microphones...\r\n");
+
+		HAL_Delay(500); // Wait for the sound of the keypress to fade
 
 		for (int i = 0; i < adc_buffer_size; i++)
 		{
@@ -256,9 +259,92 @@ void process_uart_command(uint8_t rx_char)
 		break;
 	case '3':
 		printf("%c\r\n", rx_char);
-		printf("Entering calibration mode...\r\n");
-		printf("FAIL: Not implemented\r\n");
-		// ToDo Implement calibration mode
+		printf("Entering statistics mode...\r\n");
+		printf("\r\nPress <Q> to exit\r\n");
+
+		HAL_Delay(500); // Wait for the sound of the keypress to fade
+
+		do {
+
+			if (get_trigger_mode() != trigger_off)
+			{
+				set_adc_mode(ADC_TRIGGER_MODE);
+			} else {
+				set_adc_mode(ADC_CAPTURE_MODE);
+			}
+
+			uint32_t starttime = HAL_GetTick();
+
+			reset_adc_index();
+
+			HAL_ADC_Start_IT(&hadc1);
+			HAL_ADC_Start_IT(&hadc2);
+			HAL_TIM_Base_Start_IT(&htim3);
+
+			while(get_adc_index() != adc_buffer_size);
+			uint32_t time_elapsed = HAL_GetTick() - starttime;
+
+			HAL_TIM_Base_Stop_IT(&htim3);
+			HAL_ADC_Stop_IT(&hadc1);
+			HAL_ADC_Stop_IT(&hadc2);
+
+			printf("Capture complete in %lums\r\n", time_elapsed);
+
+			// Analyze signal here
+
+			int16_t SignalMin_A = 30000;
+			int16_t SignalMax_A = -30000;
+			int64_t SamlpleSummation_A = 0;
+
+			int16_t SignalMin_B = 30000;
+			int16_t SignalMax_B = -30000;
+			int64_t SamlpleSummation_B = 0;
+
+			for (int i = 0; i < adc_buffer_size; i++)
+			{
+				if (adc_buffer_a[i] > SignalMax_B)
+				{
+					SignalMax_A = adc_buffer_a[i];
+				}
+
+				if (adc_buffer_b[i] > SignalMax_B)
+				{
+					SignalMax_B = adc_buffer_b[i];
+				}
+
+				if (adc_buffer_a[i] < SignalMin_A)
+				{
+					SignalMin_A = adc_buffer_a[i];
+				}
+
+				if (adc_buffer_b[i] < SignalMin_B)
+				{
+					SignalMin_B = adc_buffer_b[i];
+				}
+
+				SamlpleSummation_A += adc_buffer_a[i];
+				SamlpleSummation_B += adc_buffer_b[i];
+			}
+
+			float Average_A = SamlpleSummation_A / (adc_buffer_size * 1.f);
+			float Average_B = SamlpleSummation_B / (adc_buffer_size * 1.f);
+
+			printf("+==========+==========+==========+\r\n");
+			printf("| Property | Signal A | Signal B |\r\n");
+			printf("+==========+==========+==========+\r\n");
+			printf("|Min value | %8d | %8d |\r\n", SignalMin_A, SignalMin_B);
+			printf("|Max value | %8d | %8d |\r\n", SignalMax_A, SignalMax_B);
+			printf("|Average   | %5.3f | %.3f |\r\n", Average_A, Average_B);
+			printf("|Peak-peak | %8d | %8d |\r\n", SignalMax_A - SignalMin_A, SignalMax_B - SignalMin_B);
+
+			printf("+==========+==========+==========+\r\n");
+
+			printf("\r\n\r\n");
+			HAL_Delay(3000);
+
+
+			HAL_UART_Receive(&huart3, &rx_char_2, 1, 1);
+		} while ((rx_char_2 != 'Q') && (rx_char_2 != 'q'));
 
 		printf("\r\n> ");
 		break;
