@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+project/Source code/Source code\.elf\.launch
+
+project/Source code/\.settings/language\.settings\.xml

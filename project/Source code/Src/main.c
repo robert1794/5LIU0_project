@@ -337,6 +337,8 @@ void process_uart_command(uint8_t rx_char)
   */
 int main(void)
 {
+	uint16_t sample = 0;
+	float angle = 0;
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -368,7 +370,7 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  setvbuf(stdout, NULL, _IONBF, 0); // Set stdout (and thus printf) to be unbuffered.
+  setvbuf(stdout, NULL, _IONBF, 0); // Set stdout (and thus printf) to be unbuffered.0
 
   print_startup_text();
 
@@ -386,7 +388,14 @@ int main(void)
 	{
 		process_uart_command(rx_char);
 	}
+	/*Disables interrupts*/
+	__disable_irq();
 
+	sample = cross_correlate_test();
+	angle = calculate_angle(sample);
+
+	/*Enables interrupts*/
+	__enable_irq();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
