@@ -18,6 +18,7 @@
 #define trigger_min		50
 #define trigger_max		3300
 #define trigger_default		1500
+#define adc_reverence_mv	3300
 
 // Typedefs
 typedef enum trigger_type_t {

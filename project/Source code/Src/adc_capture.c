@@ -17,7 +17,8 @@ int16_t 	adc_buffer_b[adc_buffer_size];
 
 // Static variables
 static trigger_type_t 	trigger_mode 		= trigger_off;
-static int16_t 		trigger_level 		= trigger_default;
+static int16_t 		trigger_level_mv 	= trigger_default;
+static int16_t 		trigger_level_steps	= trigger_default;
 static uint32_t		adc_buffer_index	= 0;
 static adc_mode_t	adc_mode		= ADC_CAPTURE_MODE;
 
@@ -36,12 +37,19 @@ trigger_type_t 	get_trigger_mode()
 void set_trigger_level(int16_t new_trigger_level_mv)
 {
 	if ((new_trigger_level_mv >= trigger_min) && (new_trigger_level_mv <= trigger_max))
-		trigger_level = new_trigger_level_mv;
+	{
+		trigger_level_mv = new_trigger_level_mv;
+	}
+	trigger_level_steps = trigger_level_mv * 4095 / adc_reverence_mv;
+	if (trigger_level_steps > 4095)
+	{
+		trigger_level_steps = 4095;
+	}
 }
 
 int16_t	get_trigger_level()
 {
-	return trigger_level;
+	return trigger_level_mv;
 }
 
 /// \brief read the current ADC index
@@ -71,22 +79,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	static int16_t last_adc_sample_a = 1500;
 	static int16_t last_adc_sample_b = 1500;
+	static int16_t new_sample  __attribute__((__used__)) = 0;
 
 
 	if (hadc == &hadc1)
 	{
 		if (adc_mode == ADC_TRIGGER_MODE)
 		{
-			int16_t new_sample = HAL_ADC_GetValue(&hadc1);
+			new_sample = HAL_ADC_GetValue(&hadc1);
 			if ((trigger_mode == trigger_rising) || (trigger_mode == trigger_any))
 			{
-				if ((last_adc_sample_a < trigger_level) && (new_sample >= trigger_level))
+				if ((last_adc_sample_a < trigger_level_steps) && (new_sample >= trigger_level_steps))
 				{
 					// Triggered!
 					adc_mode = ADC_CAPTURE_MODE;
 				}
 			} else if ((trigger_mode == trigger_falling) || (trigger_mode == trigger_any)) {
-				if ((last_adc_sample_a < trigger_level) && (new_sample >= trigger_level))
+				if ((last_adc_sample_a < trigger_level_steps) && (new_sample >= trigger_level_steps))
 				{
 					// Triggered!
 					adc_mode = ADC_CAPTURE_MODE;
@@ -102,17 +111,17 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	} else if (hadc == &hadc2) {
 		if (adc_mode == ADC_TRIGGER_MODE)
 		{
-			int16_t new_sample = HAL_ADC_GetValue(&hadc2);
+			new_sample = HAL_ADC_GetValue(&hadc2);
 
 			if ((trigger_mode == trigger_rising) || (trigger_mode == trigger_any))
 			{
-				if ((last_adc_sample_b < trigger_level) && (new_sample >= trigger_level))
+				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
 				{
 					// Triggered!
 					adc_mode = ADC_CAPTURE_MODE;
 				}
 			} else if ((trigger_mode == trigger_falling) || (trigger_mode == trigger_any)) {
-				if ((last_adc_sample_b < trigger_level) && (new_sample >= trigger_level))
+				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
 				{
 					// Triggered!
 					adc_mode = ADC_CAPTURE_MODE;

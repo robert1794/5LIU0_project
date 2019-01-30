@@ -233,19 +233,31 @@ void process_uart_command(uint8_t rx_char)
 
 		reset_adc_index();
 
-
 		HAL_ADC_Start_IT(&hadc1);
 		HAL_ADC_Start_IT(&hadc2);
 		HAL_TIM_Base_Start_IT(&htim3);
 
-		while(get_adc_index() != adc_buffer_size);
+		while(get_adc_index() != adc_buffer_size)
+		{
+			HAL_UART_Receive(&huart3, &rx_char_2, 1, 1);
+			if ((rx_char_2 == 'q') || (rx_char_2 == 'Q'))
+			{
+				break;
+			}
+		}
+
 		uint32_t time_elapsed = HAL_GetTick() - starttime;
 
 		HAL_TIM_Base_Stop_IT(&htim3);
 		HAL_ADC_Stop_IT(&hadc1);
 		HAL_ADC_Stop_IT(&hadc2);
 
-		printf("Capture complete in %lums\r\n", time_elapsed);
+		if (get_adc_index() == adc_buffer_size)
+		{
+			printf("Capture complete in %lums\r\n", time_elapsed);
+		} else {
+			printf("Capture aborted.\r\n");
+		}
 
 		printf("\r\n> ");
 		break;
