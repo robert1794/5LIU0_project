@@ -111,23 +111,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	} else if (hadc == &hadc2) {
 		if (adc_mode == ADC_TRIGGER_MODE)
 		{
-			new_sample = HAL_ADC_GetValue(&hadc2);
-
-			if ((trigger_mode == trigger_rising) || (trigger_mode == trigger_any))
-			{
-				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
-				{
-					// Triggered!
-					adc_mode = ADC_CAPTURE_MODE;
-				}
-			} else if ((trigger_mode == trigger_falling) || (trigger_mode == trigger_any)) {
-				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
-				{
-					// Triggered!
-					adc_mode = ADC_CAPTURE_MODE;
-				}
-			}
-			last_adc_sample_b = new_sample;
+//			new_sample = HAL_ADC_GetValue(&hadc2);
+//
+//			if ((trigger_mode == trigger_rising) || (trigger_mode == trigger_any))
+//			{
+//				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
+//				{
+//					// Triggered!
+//					adc_mode = ADC_CAPTURE_MODE;
+//				}
+//			} else if ((trigger_mode == trigger_falling) || (trigger_mode == trigger_any)) {
+//				if ((last_adc_sample_b < trigger_level_steps) && (new_sample >= trigger_level_steps))
+//				{
+//					// Triggered!
+//					adc_mode = ADC_CAPTURE_MODE;
+//				}
+//			}
+//			last_adc_sample_b = new_sample;
 		} else if (adc_mode == ADC_CAPTURE_MODE){
 			if (adc_buffer_index < adc_buffer_size)
 			{

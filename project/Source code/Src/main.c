@@ -192,11 +192,11 @@ void print_startup_text()
 /// \param[in] nr_of_samples number of samples to print
 void print_adc_buffers(int16_t *buf_a, int16_t *buf_b, uint32_t nr_of_samples)
 {
-	printf("\r\nIndex;Buffer A;BufferB\r\n");
+	printf("\r\nIndex,Buffer A,Buffer B\r\n");
 
 	for (int i = 0; i < nr_of_samples; i++)
 	{
-		printf("%d;%d;%d\r\n", i, (int)buf_a[i], (int)buf_b[i]);
+		printf("%d,%d,%d\r\n", i, (int)buf_a[i], (int)buf_b[i]);
 	}
 }
 
